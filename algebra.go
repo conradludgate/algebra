@@ -2,10 +2,9 @@ package algebra
 
 import "strconv"
 
-// Structure
 type iExpression interface {
-	Parse(values map[string]float64) (float64, error)
-	String() string // For fmt/log/other print functions
+	Parse(values map[string]float64) float64
+	String() string
 }
 
 type (
@@ -13,33 +12,35 @@ type (
 	Number   float64
 )
 
-type oExpression struct { // Operator Expression
+// Operator Expression
+type oExpression struct {
 	left, right iExpression
 	opSymbol    string
 	opMethod    func(a, b float64) float64
 }
 
-type fExpression struct { // Function Expression
+// Function Expression
+type fExpression struct {
 	e       iExpression
 	fName   string
 	fMethod func(values float64) float64
 }
 
 // Parse
-func (V Variable) Parse(values map[string]float64) (float64, error) {
-	return 0, nil
+func (V Variable) Parse(values map[string]float64) float64 {
+	return values[string(V)]
 }
 
-func (N Number) Parse(values map[string]float64) (float64, error) {
-	return float64(N), nil
+func (N Number) Parse(values map[string]float64) float64 {
+	return float64(N)
 }
 
-func (o oExpression) Parse(values map[string]float64) (float64, error) {
-	return 0, nil
+func (O oExpression) Parse(values map[string]float64) float64 {
+	return O.opMethod(O.left.Parse(values), O.right.Parse(values))
 }
 
-func (F fExpression) Parse(values map[string]float64) (float64, error) {
-	return 0, nil
+func (F fExpression) Parse(values map[string]float64) float64 {
+	return F.fMethod(F.Parse(values))
 }
 
 // String

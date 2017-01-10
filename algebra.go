@@ -15,15 +15,13 @@ type (
 // Operator Expression
 type oExpression struct {
 	left, right iExpression
-	opSymbol    string
-	opMethod    func(a, b float64) float64
+	operation   string
 }
 
 // Function Expression
 type fExpression struct {
-	e       iExpression
-	fName   string
-	fMethod func(values float64) float64
+	expressions []iExpression
+	function    string
 }
 
 // Parse
@@ -36,11 +34,27 @@ func (N Number) Parse(values map[string]float64) float64 {
 }
 
 func (O oExpression) Parse(values map[string]float64) float64 {
-	return O.opMethod(O.left.Parse(values), O.right.Parse(values))
+	return Operators[O.operation](O.left.Parse(values), O.right.Parse(values))
 }
 
 func (F fExpression) Parse(values map[string]float64) float64 {
-	return F.fMethod(F.Parse(values))
+	n := len(F.expressions)
+	if n == 0 {
+		return Functions[F.function]([]float64{})
+	}
+	if n == 1 {
+		return Functions[F.function]([]float64{F.expressions[0].Parse(values)})
+	}
+	if n == 2 {
+		return Functions[F.function]([]float64{F.expressions[0].Parse(values),
+			F.expressions[1].Parse(values)})
+	}
+
+	var v []float64
+	for i, e := range F.expressions {
+		v[i] = e.Parse(values)
+	}
+	return Functions[F.function](v)
 }
 
 // String
@@ -52,10 +66,19 @@ func (N Number) String() string {
 	return strconv.FormatFloat(float64(N), 'f', -1, 64)
 }
 
-func (o oExpression) String() string {
-	return "(" + o.left.String() + " " + o.opSymbol + " " + o.right.String() + ")"
+func (O oExpression) String() string {
+	return "(" + O.left.String() + " " + O.operation + " " + O.right.String() + ")"
 }
 
 func (F fExpression) String() string {
-	return F.fName + "(" + F.e.String() + ")"
+	if len(F.expressions) == 0 {
+		return F.function + "()"
+	}
+	s := F.function + "(" + F.expressions[0].String()
+
+	for _, e := range F.expressions[1:] {
+		s += ", " + e.String()
+	}
+
+	return s + ")"
 }

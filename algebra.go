@@ -1,10 +1,13 @@
 package algebra
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type iExpression interface {
 	Parse(values map[string]float64) float64
 	String() string
+	Simplify() iExpression
 }
 
 type (
@@ -81,4 +84,19 @@ func (F fExpression) String() string {
 	}
 
 	return s + ")"
+}
+
+// Simplify
+func (V Variable) Simplify() iExpression {
+	return V
+}
+
+func (N Number) Simplify() iExpression {
+	return N
+}
+
+func (O oExpression) Simplify() iExpression {
+	if O.left == O.right {
+
+	}
 }

@@ -1,5 +1,11 @@
 package algebra
 
+import (
+	//"fmt"
+	"math"
+	"reflect"
+)
+
 func Operation(a, b iExpression, operator string) oExpression {
 	return oExpression{a, b, operator}
 }
@@ -52,9 +58,17 @@ func Function(function string, expressions ...iExpression) fExpression {
 // 	return Function(a, "sin", math.Sin)
 // }
 
-var Operators map[string](func(a, b float64) float64) {
-	"+": (func(a, b float64) float64 { return a + b }),
-	"-": (func(a, b float64) float64 { return a - b })
+var Operators map[string]func(a, b float64) float64
+var Functions map[string]func(values []float64) float64
+
+func Setup() {
+	Operators = map[string]func(a, b float64) float64{
+		"+": func(a, b float64) float64 { return a + b },
+	}
+
+	Functions = map[string]func(values []float64) float64{
+		"sin": func(values []float64) float64 { return math.Sin(values[0]) },
+	}
 }
 
-var Functions map[string]func(values []float64) float64
+func (O )
